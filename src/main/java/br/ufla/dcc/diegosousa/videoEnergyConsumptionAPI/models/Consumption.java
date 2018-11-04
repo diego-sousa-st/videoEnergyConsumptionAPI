@@ -59,6 +59,12 @@ public class Consumption {
      */
     private Double consumptionAh;
 
+
+    /**
+     * Battery Ah value on the moment that the webservie was called
+     */
+    private Double batteryAhActual;
+
     public Consumption(Double duration, Double spacialInformation, Double standardDeviationSpacialInformation,
                        Double temporalInformation, Double standardDeviationTemporalInformation, Double mbps,
                        Double widht, Double height, Double fps) {

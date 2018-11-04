@@ -6,4 +6,6 @@ public interface ConsumptionService {
 
     Consumption calculateConsumption(Consumption consumption);
 
+    Consumption calculateRemainingTimeAndIfIsPossibleWatchFullVideo(Consumption consumption);
+
 }

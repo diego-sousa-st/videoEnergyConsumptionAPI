@@ -27,4 +27,33 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
     }
 
+    @Override
+    public Consumption calculateRemainingTimeAndIfIsPossibleWatchFullVideo(Consumption consumption) {
+
+        Double ahConsumed = this.calculateConsumption(consumption).getConsumptionAh();
+
+        Consumption consumptionResult = new Consumption();
+
+        if(ahConsumed > consumption.getBatteryAhActual()) {
+
+            consumptionResult.setBatterySufficientForThisConfiguration(false);
+            consumptionResult.setRemainingTime(this.calculateRemainingTime(consumption, ahConsumed));
+
+        } else {
+
+            consumptionResult.setBatterySufficientForThisConfiguration(true);
+            consumptionResult.setRemainingTime(consumption.getDuration());
+
+        }
+
+        return consumptionResult;
+
+    }
+
+    private Double calculateRemainingTime(Consumption consumption, Double ahConsumed) {
+
+        return (consumption.getDuration()*consumption.getBatteryAhActual())/ahConsumed;
+
+    }
+
 }

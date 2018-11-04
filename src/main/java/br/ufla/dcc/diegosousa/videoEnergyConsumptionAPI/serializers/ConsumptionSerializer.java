@@ -4,7 +4,7 @@ import flexjson.JSONSerializer;
 
 public class ConsumptionSerializer {
 
-    public static JSONSerializer findForCalculateConsumption;
+    public static JSONSerializer findForCalculateConsumption, findForRemainingTime;
 
     static {
 
@@ -12,6 +12,14 @@ public class ConsumptionSerializer {
             .include("consumptionAh")
             .exclude("*")
             .prettyPrint(true);
+
+        findForRemainingTime = new JSONSerializer()
+                .include(
+                        "remainingTime",
+                        "batterySufficientForThisConfiguration"
+                )
+                .exclude("*")
+                .prettyPrint(true);
 
     }
 

@@ -1,7 +1,6 @@
 package br.ufla.dcc.diegosousa.videoEnergyConsumptionAPI.controllers;
 
 import br.ufla.dcc.diegosousa.videoEnergyConsumptionAPI.models.Consumption;
-import br.ufla.dcc.diegosousa.videoEnergyConsumptionAPI.results.Json;
 import br.ufla.dcc.diegosousa.videoEnergyConsumptionAPI.serializers.ConsumptionSerializer;
 import br.ufla.dcc.diegosousa.videoEnergyConsumptionAPI.services.ConsumptionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,14 @@ public class EnergyConsumption extends BaseController {
     public String calculateConsumption(@RequestBody Consumption consumption) {
 
         return renderJSON(this.consumptionService.calculateConsumption(consumption), ConsumptionSerializer.findForCalculateConsumption);
+
+    }
+
+
+    @PostMapping("consumption/timeRemaining")
+    public String calculateRemainigTimeAndIfIsPossibleWatchFullVideo(@RequestBody Consumption consumption) {
+
+        return renderJSON(this.consumptionService.calculateRemainingTimeAndIfIsPossibleWatchFullVideo(consumption), ConsumptionSerializer.findForRemainingTime);
 
     }
 
