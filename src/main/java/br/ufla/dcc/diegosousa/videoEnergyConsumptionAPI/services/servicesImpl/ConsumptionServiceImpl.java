@@ -18,7 +18,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
                                 Coeficients.X3.getValue()*consumption.getTemporalInformation()+
                                 Coeficients.X4.getValue()*consumption.getStandardDeviationTemporalInformation()+
                                 Coeficients.X5.getValue()*consumption.getMbps()+
-                                Coeficients.X6.getValue()*consumption.getWidht()+
+                                Coeficients.X6.getValue()*consumption.getWidth()+
                                 Coeficients.X7.getValue()*consumption.getHeight()+
                                 Coeficients.X8.getValue()*consumption.getFps()
                 )
@@ -39,7 +39,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             consumptionResult.setBatterySufficientForThisConfiguration(false);
             consumptionResult.setRemainingTime(this.calculateRemainingTime(consumption, ahConsumed));
-            this.calculateBestConfiguration(consumption);
+            this.calculateBestConfiguration(consumption, consumptionResult);
 
         } else {
 
@@ -52,7 +52,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
     }
 
-    private void calculateBestConfiguration(Consumption consumption) {
+    private void calculateBestConfiguration(Consumption consumption, Consumption consumptionResult) {
 
         try {
 
@@ -69,10 +69,10 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             // Create variables
 
-            GRBVar mbps = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "mbps");
-            GRBVar width = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "width");
-            GRBVar height = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "height");
-            GRBVar fps = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER, "fps");
+            GRBVar mbps = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "mbps");
+            GRBVar width = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "width");
+            GRBVar height = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "height");
+            GRBVar fps = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "fps");
 
             int sizeY = Width.values().length;
             GRBVar y[] = new GRBVar[sizeY];
@@ -110,7 +110,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             }
 
-            // Set objective: maximize ln duration + u - ln 4
+            // Set objective: maximize ln(duration) + u - ln(4)
             // u = x5mbps + x6widht + x7height + x8fps
 
             GRBLinExpr expr = new GRBLinExpr();
@@ -144,9 +144,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             expr = new GRBLinExpr();
 
-            for (int i = 0; i < y.length; i++) {
+            for (GRBVar aY : y) {
 
-                expr.addTerm(1.0, y[i]);
+                expr.addTerm(1.0, aY);
 
             }
 
@@ -172,9 +172,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             expr = new GRBLinExpr();
 
-            for (int i = 0; i < z.length; i++) {
+            for (GRBVar aZ : z) {
 
-                expr.addTerm(1.0, z[i]);
+                expr.addTerm(1.0, aZ);
 
             }
 
@@ -200,9 +200,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             expr = new GRBLinExpr();
 
-            for (int i = 0; i < w.length; i++) {
+            for (GRBVar aW : w) {
 
-                expr.addTerm(1.0, w[i]);
+                expr.addTerm(1.0, aW);
 
             }
 
@@ -228,9 +228,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             expr = new GRBLinExpr();
 
-            for (int i = 0; i < v.length; i++) {
+            for (GRBVar aV : v) {
 
-                expr.addTerm(1.0, v[i]);
+                expr.addTerm(1.0, aV);
 
             }
 
@@ -250,7 +250,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
             model.addConstr(expr, GRB.LESS_EQUAL, Math.log(consumption.getBatteryAhActual()), "c4");
 
 
-            // Add constraint width < 2height
+            // Add constraint width <= 2 * height
 
             expr = new GRBLinExpr();
 
@@ -261,36 +261,22 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             System.out.println(model.toString());
 
+            model.write("resultado.lp");
+
             model.optimize();
 
-//            for (int i = 0; i < y.length; i++) {
-//
-//                System.out.println(y[i].get(GRB.StringAttr.VarName) + " " +y[i].get(GRB.DoubleAttr.X));
-//
-//            }
-//
-//
-//            for (int i = 0; i < z.length; i++) {
-//
-//                System.out.println(z[i].get(GRB.StringAttr.VarName) + " " +z[i].get(GRB.DoubleAttr.X));
-//
-//            }
-//
-//
-//            for (int i = 0; i < w.length; i++) {
-//
-//                System.out.println(w[i].get(GRB.StringAttr.VarName) + " " +w[i].get(GRB.DoubleAttr.X));
-//
-//            }
-//
-//            for (int i = 0; i < v.length; i++) {
-//
-//                System.out.println(v[i].get(GRB.StringAttr.VarName) + " " +v[i].get(GRB.DoubleAttr.X));
-//
-//            }
-//
-//
-//            System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
+            System.out.println("width: "+width.get(GRB.DoubleAttr.X));
+            System.out.println("height: "+height.get(GRB.DoubleAttr.X));
+            System.out.println("fps: "+fps.get(GRB.DoubleAttr.X));
+            System.out.println("mbps: "+mbps.get(GRB.DoubleAttr.X));
+
+
+            System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
+
+            Consumption recommendedConfiguration = new Consumption(width.get(GRB.DoubleAttr.X),
+                    height.get(GRB.DoubleAttr.X), mbps.get(GRB.DoubleAttr.X), fps.get(GRB.DoubleAttr.X));
+
+            consumptionResult.setRecommendedConfiguration(recommendedConfiguration);
 
             // Dispose of model and environment
 

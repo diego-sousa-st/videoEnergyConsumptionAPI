@@ -34,7 +34,7 @@ public class Consumption {
     /**
      * Width of the video frame
      */
-    private Double widht;
+    private Double width;
     /**
      * Heigth of the video frame
      */
@@ -65,9 +65,11 @@ public class Consumption {
      */
     private Double batteryAhActual;
 
+    private Consumption recommendedConfiguration;
+
     public Consumption(Double duration, Double spacialInformation, Double standardDeviationSpacialInformation,
                        Double temporalInformation, Double standardDeviationTemporalInformation, Double mbps,
-                       Double widht, Double height, Double fps) {
+                       Double width, Double height, Double fps) {
 
         this.duration = duration;
         this.spacialInformation = spacialInformation;
@@ -75,7 +77,7 @@ public class Consumption {
         this.temporalInformation = temporalInformation;
         this.standardDeviationTemporalInformation = standardDeviationTemporalInformation;
         this.mbps = mbps;
-        this.widht = widht;
+        this.width = width;
         this.height = height;
         this.fps = fps;
 
@@ -84,6 +86,15 @@ public class Consumption {
     public Consumption(Double consumptionAh) {
 
         this.consumptionAh = consumptionAh;
+
+    }
+
+    public Consumption(Double width, Double height, Double mbps, Double fps) {
+
+        this.width = width;
+        this.height = height;
+        this.mbps = mbps;
+        this.fps = fps;
 
     }
 

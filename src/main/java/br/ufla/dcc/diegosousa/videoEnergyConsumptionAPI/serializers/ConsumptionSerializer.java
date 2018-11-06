@@ -16,7 +16,11 @@ public class ConsumptionSerializer {
         findForRemainingTime = new JSONSerializer()
                 .include(
                         "remainingTime",
-                        "batterySufficientForThisConfiguration"
+                        "batterySufficientForThisConfiguration",
+                        "recommendedConfiguration.width",
+                        "recommendedConfiguration.height",
+                        "recommendedConfiguration.mbps",
+                        "recommendedConfiguration.fps"
                 )
                 .exclude("*")
                 .prettyPrint(true);
