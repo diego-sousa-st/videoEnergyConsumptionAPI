@@ -257,6 +257,12 @@ public class ConsumptionServiceImpl implements ConsumptionService {
             expr.addTerm(0.5, width);
             model.addConstr(expr, GRB.LESS_EQUAL, height, "c5");
 
+            // Add constraint fps >= fps/2
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(1, fps);
+
             // Optimize model
 
             System.out.println(model.toString());

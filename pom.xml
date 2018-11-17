@@ -89,17 +89,16 @@
 			<artifactId>flexjson</artifactId>
 			<version>3.3</version>
 		</dependency>
-		<!-- Flexjson -->
-		<dependency>
-			<groupId>net.sf.flexjson</groupId>
-			<artifactId>flexjson</artifactId>
-			<version>3.3</version>
-		</dependency>
 		<!--JSON exception-->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20180130</version>
+		</dependency>
+		<dependency>
+			<groupId>com.gurobi</groupId>
+			<artifactId>gurobi</artifactId>
+			<version>8.0</version>
 		</dependency>
 	</dependencies>
 
@@ -139,6 +138,11 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>project.local</id>
+			<name>project</name>
+			<url>file:${project.basedir}/repo</url>
 		</repository>
 	</repositories>
 
