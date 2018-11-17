@@ -74,6 +74,14 @@ public class ConsumptionServiceImpl implements ConsumptionService {
             GRBVar height = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "height");
             GRBVar fps = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "fps");
 
+            GRBVar si = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "si");
+            GRBVar sdsi = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "sdsi");
+            GRBVar ti = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "ti");
+            GRBVar sdti = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "sdti");
+
+            GRBVar L = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "L");
+            GRBVar H = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "H");
+
             int sizeY = Width.values().length;
             GRBVar y[] = new GRBVar[sizeY];
 
@@ -115,7 +123,12 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             GRBLinExpr expr = new GRBLinExpr();
 
-            expr.addConstant(Math.log(consumption.getDuration())-Math.log(Coeficients.DURATION.getValue()));
+            expr.addConstant(Math.log(consumption.getDuration()*Coeficients.K.getValue())-Math.log(Coeficients.DURATION.getValue()));
+
+            expr.addTerm(Coeficients.X1.getValue(), si);
+            expr.addTerm(Coeficients.X2.getValue(), sdsi);
+            expr.addTerm(Coeficients.X3.getValue(), ti);
+            expr.addTerm(Coeficients.X4.getValue(), sdti);
 
             expr.addTerm(Coeficients.X5.getValue(), mbps);
             expr.addTerm(Coeficients.X6.getValue(), width);
@@ -240,7 +253,12 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             expr = new GRBLinExpr();
 
-            expr.addConstant(Math.log(consumption.getDuration())-Math.log(Coeficients.DURATION.getValue()));
+            expr.addConstant(Math.log(consumption.getDuration()*Coeficients.K.getValue())-Math.log(Coeficients.DURATION.getValue()));
+
+            expr.addTerm(Coeficients.X1.getValue(), si);
+            expr.addTerm(Coeficients.X2.getValue(), sdsi);
+            expr.addTerm(Coeficients.X3.getValue(), ti);
+            expr.addTerm(Coeficients.X4.getValue(), sdti);
 
             expr.addTerm(Coeficients.X5.getValue(), mbps);
             expr.addTerm(Coeficients.X6.getValue(), width);
@@ -249,19 +267,86 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             model.addConstr(expr, GRB.LESS_EQUAL, Math.log(consumption.getBatteryAhActual()), "c4");
 
-
-            // Add constraint width <= 2 * height
+            // Add constraint width >= 1,33 * height
 
             expr = new GRBLinExpr();
 
-            expr.addTerm(0.5, width);
-            model.addConstr(expr, GRB.LESS_EQUAL, height, "c5");
+            expr.addTerm(100.0/133.0, width);
+            model.addConstr(expr, GRB.GREATER_EQUAL, height, "c5");
 
-            // Add constraint fps >= fps/2
+            // Add constraint fps >= fpsAtual/2
 
             expr = new GRBLinExpr();
 
             expr.addTerm(1, fps);
+            model.addConstr(expr, GRB.GREATER_EQUAL, consumption.getFps()/2, "c6");
+
+            // Add constraint to limit minimum mbps > 8
+
+            expr = new GRBLinExpr();
+
+            for (int i = 5; i < y.length-3; i++) {
+
+                expr.addTerm(1.0, y[i]);
+
+            }
+
+            model.addConstr(expr, GRB.EQUAL, L, "n1");
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(8, L);
+            model.addConstr(expr, GRB.LESS_EQUAL, mbps, "cn1");
+
+            // Add constraint to limit minimum mbps > 12
+
+            expr = new GRBLinExpr();
+
+            for (int i = y.length-3; i < y.length; i++) {
+
+                expr.addTerm(1.0, y[i]);
+
+            }
+
+            model.addConstr(expr, GRB.EQUAL, H, "n2");
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(12, H);
+            model.addConstr(expr, GRB.LESS_EQUAL, mbps, "cn2");
+
+            // Add constraint si e sdsi
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(1, si);
+            model.addConstr(expr, GRB.EQUAL, consumption.getSpacialInformation(), "cn2");
+
+            // sdsi
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(1, sdsi);
+            model.addConstr(expr, GRB.EQUAL, consumption.getStandardDeviationSpacialInformation(), "cn2");
+
+            // Add constraint ti e sdti
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(1, ti);
+            model.addConstr(expr, GRB.EQUAL, consumption.getTemporalInformation(), "cn7");
+
+            // sdti
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(1, sdti);
+            model.addConstr(expr, GRB.EQUAL, consumption.getStandardDeviationTemporalInformation(), "cn9");
+
+            expr = new GRBLinExpr();
+
+            expr.addTerm(1, sdti);
+            model.addConstr(expr, GRB.EQUAL, consumption.getStandardDeviationTemporalInformation(), "cn10");
 
             // Optimize model
 
