@@ -221,7 +221,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
             model.addConstr(expr, GRB.EQUAL, 1, "c2");
 
-            // Add constraint: 4w1 + ... + 20w5 = mbps
+            // Add constraint: 15w1 + ... + 60w5 = fps
 
             expr = new GRBLinExpr();
 
